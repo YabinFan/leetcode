@@ -1,0 +1,56 @@
+class TrieNode():
+    def __init__(self):
+        self.children = {}
+        self.weight = -1
+
+class Trie():
+    def __init__(self):
+        self.root = TrieNode()
+    
+    def insert(self, word, i):
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.weight = i
+    
+    def all_weights(self, prefix):
+        def dfs(node):
+            if node.weight != -1:
+                wgts.add(node.weight)
+            for char in node.children:
+                dfs(node.children[char])
+                
+        wgts = set()
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return wgts
+            node = node.children[char]
+        dfs(node)
+        return wgts
+        
+class WordFilter:
+    def __init__(self, words: List[str]):
+        self.prefix, self.suffix = Trie(), Trie()
+        i, n = 0, len(words)
+        while i < n:
+            self.prefix.insert(words[i], i)
+            self.suffix.insert(words[i][::-1], i)
+            i += 1
+
+    def f(self, prefix: str, suffix: str) -> int:
+        pre = self.prefix.all_weights(prefix)
+        suf = self.suffix.all_weights(suffix[::-1])
+        l_pre, l_suf = len(pre), len(suf)
+        max_wgt = -1
+        if l_pre < l_suf:
+            for wgt in pre:
+                if wgt in suf:
+                    max_wgt = max(max_wgt, wgt)
+        else:
+            for wgt in suf:
+                if wgt in pre:
+                    max_wgt = max(max_wgt, wgt)
+        return max_wgt
